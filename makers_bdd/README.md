@@ -3,6 +3,10 @@
 A simple demonstration of a Java (Maven) project which uses Cucumber to run
 BDD tests against the Makers website (via Selenium).
 
+For more instructions on how to import, open and run this project, see the 
+relevant sections in the Testing Skills curriculum.
+
+<!--
 This project was constructed via the following steps:
 
 * Create a folder for the project.
@@ -17,3 +21,4 @@ on the Cucumber website, to incorporate sample Selenium code into your step
 definitions.
 * Add a `cucumber.properties` file to the `src/test/resources` folder, which is 
 configured to enable the automatic exporting of test reports.
+-->
