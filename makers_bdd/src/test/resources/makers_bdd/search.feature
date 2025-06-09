@@ -1,4 +1,4 @@
-Feature: FAQs Page
+Feature: FAQ Page
 
   Scenario: FAQ search term displayed on results page
     Given I am on the Makers FAQ page
