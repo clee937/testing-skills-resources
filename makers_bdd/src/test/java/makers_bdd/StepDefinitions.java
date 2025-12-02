@@ -30,8 +30,14 @@ public class StepDefinitions {
 
     @Then("the results header should mention {string}")
     public void checkTitle(String searchString) {
-        WebElement h1 = driver.findElement(By.className("kb-search-results__heading"));
-        assertTrue(h1.getText().contains(searchString));
+        WebElement resultHeading = driver.findElement(By.className("kb-search-results__heading"));
+        assertTrue(resultHeading.getText().contains(searchString));
+    }
+
+    @Then("the results body should say no results were found for {string}")
+    public void checkNoResultsFoundMessage(String searchString) {
+        WebElement resultBody = driver.findElement(By.className("kb-search-results__listing"));
+        assertTrue(resultBody.getText().contains("no search results for \"" + searchString + "\""));
     }
 
     @After
