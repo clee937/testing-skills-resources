@@ -11,6 +11,4 @@ option is the way to go if you're going to be doing any of:
 
 * Running a script locally
 * Making changes to things
-* Wanting to commit your own work to GitHub (N.B. in this case, remember to
-  [fork this repository to your own account](../../fork), then clone that repository so you
-  have permissions to push changes)
+* Wanting to commit your own work to GitHub (N.B. in this case, you should [create your own copy of this template](https://github.com/new?owner=makersacademy&template_name=testing-skills-resources&template_owner=makersacademy), then clone that repository so you have permissions to push changes)
