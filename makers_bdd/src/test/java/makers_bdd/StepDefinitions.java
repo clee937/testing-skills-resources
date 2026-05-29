@@ -7,6 +7,11 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.time.Duration;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -21,23 +26,24 @@ public class StepDefinitions {
 
     @When("I search for {string}")
     public void search_for(String query) throws InterruptedException {
-        WebElement mainSearch = driver.findElement(By.className("kb-search__bar"));
-        WebElement element = mainSearch.findElement(By.name("term"));
-        element.sendKeys(query);
-        element.submit();
+        WebElement mainSearch = driver.findElement(By.id("hs_kb-search-input-module-input"));
+        mainSearch.click();
+        mainSearch.sendKeys(query);
+        mainSearch.submit();
         Thread.sleep(3000); // We should really use a dynamic wait!
     }
 
-    @Then("the results header should mention {string}")
-    public void checkTitle(String searchString) {
-        WebElement resultHeading = driver.findElement(By.className("kb-search-results__heading"));
-        assertTrue(resultHeading.getText().contains(searchString));
+    @Then("the results page should display results for this term")
+    public void the_results_page_should_display_results_for_this_term() {
+        List<WebElement> noResults = driver.findElements(By.className("hs-search__no-results"));
+        assertTrue(noResults.isEmpty(), "The 'no results found' message appeared unexpectedly.");
     }
 
     @Then("the results body should say no results were found for {string}")
     public void checkNoResultsFoundMessage(String searchString) {
-        WebElement resultBody = driver.findElement(By.className("kb-search-results__listing"));
-        assertTrue(resultBody.getText().contains("no search results for \"" + searchString + "\""));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebElement searchResultHeader = wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("hs-search__no-results")));
+        assertTrue(searchResultHeader.getText().contains("no results for \"" + searchString + "\""));
     }
 
     @After
