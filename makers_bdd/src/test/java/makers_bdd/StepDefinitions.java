@@ -13,6 +13,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class StepDefinitions {
@@ -37,6 +38,25 @@ public class StepDefinitions {
     public void the_results_page_should_display_results_for_this_term() {
         List<WebElement> noResults = driver.findElements(By.className("hs-search__no-results"));
         assertTrue(noResults.isEmpty(), "The 'no results found' message appeared unexpectedly.");
+    }
+
+
+    @Then("there should be {int} results")
+    public void there_should_be_results_count_results(int resultsCount) {
+        List<WebElement> results =
+                driver.findElements(By.cssSelector("#hsresults li"));
+
+        assertEquals(resultsCount, results.size());
+    }
+
+    @Then("the term {string} should appear in the URL")
+    public void the_term_should_appear_in_the_url(String searchTerm) {
+        String currentUrl = driver.getCurrentUrl();
+
+        assertTrue(
+                currentUrl != null && currentUrl.contains(searchTerm),
+                "Expected URL to contain: " + searchTerm + " but was: " + currentUrl
+        );
     }
 
     @Then("the results body should say no results were found for {string}")
