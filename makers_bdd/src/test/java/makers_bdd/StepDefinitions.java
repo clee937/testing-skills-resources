@@ -12,6 +12,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -20,9 +21,32 @@ public class StepDefinitions {
 
     private final WebDriver driver = new FirefoxDriver();
 
+    private void acceptCookiesIfPresent() {
+        try {
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+
+            WebElement acceptButton = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.id("hs-eu-confirmation-button")
+                    )
+            );
+
+            acceptButton.click();
+
+        } catch (TimeoutException e) {
+            // Cookie banner not displayed — continue test
+        }
+    }
+
     @Given("I am on the Makers FAQ page")
     public void I_visit_faq_page() {
         driver.get("https://faq.makers.tech/en/knowledge");
+    }
+
+    @Given("I am on the Makers homepage")
+    public void I_visit_homepage() {
+        driver.get("https://makers.tech/");
+        acceptCookiesIfPresent();
     }
 
     @When("I search for {string}")
@@ -32,6 +56,25 @@ public class StepDefinitions {
         mainSearch.sendKeys(query);
         mainSearch.submit();
         Thread.sleep(3000); // We should really use a dynamic wait!
+    }
+
+    @When("I click the FAQ link")
+    public void clickFaqLink() {
+        String originalWindow = driver.getWindowHandle();
+
+        driver.findElement(By.linkText("FAQ")).click();
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        wait.until(driver -> driver.getWindowHandles().size() > 1);
+
+        for (String windowHandle : driver.getWindowHandles()) {
+            if (!windowHandle.equals(originalWindow)) {
+                driver.switchTo().window(windowHandle);
+                break;
+            }
+        }
+
+        wait.until(ExpectedConditions.urlContains("/en/knowledge"));
     }
 
     @Then("the results page should display results for this term")
@@ -65,6 +108,19 @@ public class StepDefinitions {
         WebElement searchResultHeader = wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("hs-search__no-results")));
         assertTrue(searchResultHeader.getText().contains("no results for \"" + searchString + "\""));
     }
+
+    @Then("I should be on the FAQ page")
+    public void checkIfOnFaqPage() {
+        assertEquals(
+                "https://faq.makers.tech/en/knowledge",
+                driver.getCurrentUrl(), "Expected URL to be: " + "https://faq.makers.tech/en/knowledge" + " but the url was: " + driver.getCurrentUrl()
+        );
+    }
+
+//    @Then("I should be on the FAQ page")
+//    public void checkIfOnFaqPage() {
+//        assertTrue(Objects.requireNonNull(driver.getCurrentUrl()).contains("/en/knowledge"), "Expected URL to contain: " + "/en/knowledge" + " but the url was: " + driver.getCurrentUrl());
+//    }
 
     @After
     public void closeBrowser(Scenario scenario){
