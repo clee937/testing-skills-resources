@@ -12,7 +12,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -58,23 +57,28 @@ public class StepDefinitions {
         Thread.sleep(3000); // We should really use a dynamic wait!
     }
 
-    @When("I click the FAQ link")
-    public void clickFaqLink() {
-        String originalWindow = driver.getWindowHandle();
+    @When("I click the {string} link")
+    public void clickLink(String linkText) {
 
-        driver.findElement(By.linkText("FAQ")).click();
+        String originalWindow = driver.getWindowHandle();
+        int originalWindowCount = driver.getWindowHandles().size();
+
+        driver.findElement(By.linkText(linkText)).click();
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        wait.until(driver -> driver.getWindowHandles().size() > 1);
 
-        for (String windowHandle : driver.getWindowHandles()) {
-            if (!windowHandle.equals(originalWindow)) {
-                driver.switchTo().window(windowHandle);
-                break;
+        try {
+            wait.until(driver -> driver.getWindowHandles().size() > originalWindowCount);
+
+            for (String windowHandle : driver.getWindowHandles()) {
+                if (!windowHandle.equals(originalWindow)) {
+                    driver.switchTo().window(windowHandle);
+                    break;
+                }
             }
+        } catch (TimeoutException e) {
+            // Link stayed in the same tab — that's fine
         }
-
-        wait.until(ExpectedConditions.urlContains("/en/knowledge"));
     }
 
     @Then("the results page should display results for this term")
@@ -109,18 +113,17 @@ public class StepDefinitions {
         assertTrue(searchResultHeader.getText().contains("no results for \"" + searchString + "\""));
     }
 
-    @Then("I should be on the FAQ page")
-    public void checkIfOnFaqPage() {
-        assertEquals(
-                "https://faq.makers.tech/en/knowledge",
-                driver.getCurrentUrl(), "Expected URL to be: " + "https://faq.makers.tech/en/knowledge" + " but the url was: " + driver.getCurrentUrl()
+    @Then("I should be on the {string} page")
+    public void iShouldBeOnPage(String expectedPath) {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        wait.until(ExpectedConditions.urlContains(expectedPath));
+
+        assertTrue(
+                driver.getCurrentUrl().contains(expectedPath),
+                "Expected URL to contain: " + expectedPath +
+                        " but was: " + driver.getCurrentUrl()
         );
     }
-
-//    @Then("I should be on the FAQ page")
-//    public void checkIfOnFaqPage() {
-//        assertTrue(Objects.requireNonNull(driver.getCurrentUrl()).contains("/en/knowledge"), "Expected URL to contain: " + "/en/knowledge" + " but the url was: " + driver.getCurrentUrl());
-//    }
 
     @After
     public void closeBrowser(Scenario scenario){
@@ -131,3 +134,5 @@ public class StepDefinitions {
         driver.quit();
     }
 }
+
+// Next steps: Refactor using page object models
